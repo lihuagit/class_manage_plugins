@@ -3,6 +3,8 @@
 插件为[zhenxun_bot](https://github.com/HibiKier/zhenxun_bot)格式  
 稍加修改也可以用于原生nonebot  
 
+**！！！插件基于zhenxun_bot运行，请将插件放在path/zhenxun_bot/plugins目录下**  
+
 ## 已有插件
 
 - 作业管理  
