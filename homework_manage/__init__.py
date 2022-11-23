@@ -3,6 +3,7 @@ from nonebot.typing import T_State
 from nonebot.params import CommandArg, RegexGroup
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, GroupMessageEvent, Bot
 from nonebot.log import logger
+from nonebot.rule import to_me
 from datetime import datetime
 from utils.utils import is_number, scheduler, get_bot
 from utils.image_utils import text2image
@@ -75,8 +76,8 @@ __plugin_configs__ = {
 add_sub = on_command("添加作业", priority=5, block=True)
 update_hw_sub = on_command("修改作业内容", priority=5, block=True)
 update_end_date_sub = on_command("修改作业时间", priority=5, block=True)
-del_sub = on_command("删除作业", priority=5, block=True)
-show_sub_info = on_regex("^查看作业$", priority=5, block=True)
+del_sub = on_regex(r"^删除作业[\s\S]*?(\d+)$", priority=5, block=True)
+show_sub_info = on_regex("^查看作业$", rule=to_me(),priority=5, block=True)
 user_sub = on_command("修改用户权限", priority=5, block=True)
 
 @add_sub.handle()
@@ -147,14 +148,13 @@ async def _(event: MessageEvent, state: T_State, arg: Message = CommandArg()):
     
 
 @del_sub.handle()
-async def _(event: MessageEvent, arg: Message = CommandArg()):
+async def _(event: MessageEvent, reg_group: Tuple[Any, ...] = RegexGroup()):
     if not await LevelUser.check_level(
             event.user_id,
             Config.get_config("homework_manage", "USER_HOMEWORK_SUB_LEVEL"),
         ):
             await del_sub.finish(f"您的权限不足")
-            
-    reg_group = arg.extract_plain_text().strip().split()
+
     msg = (int)(reg_group[0])
     res = await HomeworkSub.delete_homework_sub(msg)
     if res['res']:
