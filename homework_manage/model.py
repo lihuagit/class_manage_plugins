@@ -5,7 +5,7 @@ from typing import Optional, List
 from utils.image_utils import BuildImage
 from pathlib import Path
 
-MY_IMAGE_PATH = Path() / "plugins" / "homework_manage" / "res"
+MY_IMAGE_PATH = Path() / "plugins" / "class_manage" / "homework_manage" / "res"
 
 # 声明模型
 class HomeworkSub(db.Model):
