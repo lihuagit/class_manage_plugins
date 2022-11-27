@@ -117,7 +117,7 @@ async def _(event: MessageEvent, state: T_State, arg: Message = CommandArg()):
     day = (int)(end_date_[idx])
     idx += 1
 
-    hour = 22
+    hour = 20
     minute = 0
     second = 0
 
