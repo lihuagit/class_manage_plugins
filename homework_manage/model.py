@@ -124,16 +124,17 @@ class HomeworkSub(db.Model):
 
     """
     说明:
-        获取所有数据
+        获取所有作业
     """
     @classmethod
     async def get_all_sub_data(
         cls,
-    ) -> List:
+    ) -> dict:
         hk_data = []
         query = await cls.query.order_by(cls.hw_end_date, cls.id).gino.all()
         i=1
         for x in query:
+            if(x.hw_end_date.year == 2048): continue
             if x.sub_id == 999 :
                 hk_data.append(x)
                 continue
@@ -144,6 +145,7 @@ class HomeworkSub(db.Model):
         send_rst = "目前的作业有:\n"
         res = True
         for x in hk_data:
+            if(x.hw_end_date.year == 2048): continue
             if(x.sub_id == 999):
                 send_rst +="\n----------------------------------\n"
                 send_rst += f"！！！备注：{x.hw}\n"
@@ -157,6 +159,62 @@ class HomeworkSub(db.Model):
                 "       目前没有任何作业...\n"
             )
             res = False
+
+        # A.paste(bk, alpha=True)
+        # A.text((int(width * 0.048), int(height * 0.21)), send_rst)
+        res_img = await cls.get_img(send_rst=send_rst)
+        return {'res': res, 'img':res_img}
+
+    """
+    说明:
+        获取所有考试
+    """
+    @classmethod
+    async def get_all_sub_exam(
+        cls,
+    ) -> dict:
+        hk_data = []
+        query = await cls.query.order_by(cls.hw_end_date, cls.id).gino.all()
+        i=1001
+        for x in query:
+            if(x.hw_end_date.year != 2048): continue
+            await x.update(sub_id=i).apply()
+            i+=1
+            hk_data.append(x)
+        
+        send_rst = "目前的考试有:\n"
+        res = True
+        for x in hk_data:
+            if(x.hw_end_date.year != 2048): continue
+            if(x.sub_id == 999):
+                send_rst +="\n----------------------------------\n"
+                send_rst += f"！！！备注：{x.hw}\n"
+                continue
+            send_rst += (
+                f"\t{x.sub_id} : {x.hw}\n" 
+                f"\t\t\t\t  -------- {x.hw_end_date} \n\n"
+            )
+        if (len(hk_data) == 0):
+            send_rst += (
+                "       目前没有任何考试...\n"
+            )
+            res = False
+
+        # A.paste(bk, alpha=True)
+        # A.text((int(width * 0.048), int(height * 0.21)), send_rst)
+        res_img = await cls.get_img(send_rst=send_rst)
+        return {'res': res, 'img':res_img}
+
+    
+    """
+    说明:
+        绘图
+    """
+    @classmethod
+    async def get_img(
+        cls,
+        send_rst: str,
+    ) :
         width = 0
         for x in send_rst.split("\n"):
             _width = len(x) * 24
@@ -256,11 +314,8 @@ class HomeworkSub(db.Model):
         bk.paste(img=ht, pos=(bk.w-ht.w, bk.h-ht.h), alpha=True)
         bk.paste(img=gb, pos=((int)(0.35*bk.w), bk.h-gb.h), alpha=True)
         bk.paste(img=A, alpha=True)
-
-        # A.paste(bk, alpha=True)
-        # A.text((int(width * 0.048), int(height * 0.21)), send_rst)
-
-        return {'res': res, 'img':bk.pic2bs4()}
+        return bk.pic2bs4()
+    
 
 # # 增加作业
 # async def homework_add(tag_homework, tag_str_date):

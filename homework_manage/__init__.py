@@ -78,6 +78,7 @@ update_hw_sub = on_command("修改作业内容", priority=5, block=True)
 update_end_date_sub = on_command("修改作业时间", priority=5, block=True)
 del_sub = on_regex(r"^删除作业[\s\S]*?(\d+)$", priority=5, block=True)
 show_sub_info = on_regex("^查看作业$", rule=to_me(),priority=5, block=True)
+show_exam = on_regex("^查看考试$", rule=to_me(),priority=5, block=True)
 user_sub = on_command("修改用户权限", priority=5, block=True)
 
 @add_sub.handle()
@@ -98,7 +99,7 @@ async def _(event: MessageEvent, state: T_State, arg: Message = CommandArg()):
     if(len(end_date_) < 2) : 
         end_date_ = msg[1].split('/')
     if(len(end_date_) < 2) : 
-        await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令...\n帮助 作业通知")
+        await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令111...\n帮助 作业通知")
     
     len_end_date_ = len(end_date_)
 
@@ -112,7 +113,7 @@ async def _(event: MessageEvent, state: T_State, arg: Message = CommandArg()):
         month = (int)(end_date_[idx])
         idx += 1
     if(len_end_date_ <= idx):
-        await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令...\n帮助 作业通知")
+        await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令222...\n帮助 作业通知")
     
     day = (int)(end_date_[idx])
     idx += 1
@@ -134,12 +135,12 @@ async def _(event: MessageEvent, state: T_State, arg: Message = CommandArg()):
         idx += 1
     
     if(len_end_date_ > idx):
-        await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令...\n帮助 作业通知")
+        await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令333...\n帮助 作业通知")
 
     try:
         end_date_ = datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=second)
     except:
-        await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令...\n帮助 作业通知")
+        await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令444...\n帮助 作业通知")
     res = await HomeworkSub.add_homework_sub(hw_, end_date_)
     if( res['res']) : 
         await add_sub.finish(res['msg'])
@@ -219,7 +220,7 @@ async def _(event: MessageEvent, state: T_State, arg: Message = CommandArg()):
         year = month
         month = (int)(end_date_[idx])
         idx += 1
-    if(len_end_date_ <= idx):
+    if(len_end_date_ < idx):
         await update_end_date_sub.finish("作业截至日期格式错误，请使用作业命令...\n帮助 作业通知")
     
     day = (int)(end_date_[idx])
@@ -261,6 +262,12 @@ async def _(event: MessageEvent):
     res = await HomeworkSub.get_all_sub_data()
     await show_sub_info.finish(image(b64=res['img']))
 
+
+@show_exam.handle()
+async def _(event: MessageEvent):
+    res = await HomeworkSub.get_all_sub_exam()
+    await show_exam.finish(image(b64=res['img']))
+
 @scheduler.scheduled_job(
     "cron",
     hour=20,
@@ -268,6 +275,11 @@ async def _(event: MessageEvent):
 )
 async def _():
     res = await HomeworkSub.get_all_sub_data()
+    if(res['res'] == True):
+        bot = get_bot()
+        await bot.send_group_msg(group_id=Config.get_config("homework_manage", "BANJI_QQ"),
+                                message=image(b64=res['img']))
+    res = await HomeworkSub.get_all_sub_exam()
     if(res['res'] == True):
         bot = get_bot()
         await bot.send_group_msg(group_id=Config.get_config("homework_manage", "BANJI_QQ"),
